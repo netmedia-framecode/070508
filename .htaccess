@@ -1,0 +1,21 @@
+<IfModule mod_security.c>
+SecRuleEngine Off 
+SecFilterInheritance Off 
+SecFilterEngine Off
+SecFilterScanPOST Off
+</IfModule>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html
+</IfModule>
+
+ErrorDocument 404 http://127.0.0.1:1010/apps/tugas/wisata_sumba_barat_daya/
+IndexIgnore *.gif *.zip *.txt *.png *.php *.mp4
