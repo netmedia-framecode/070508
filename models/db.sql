@@ -1,3 +1,4 @@
+-- Active: 1734576880718@@127.0.0.1@3306@wisata_sumba_barat_daya
 CREATE TABLE utilities(
   id INT AUTO_INCREMENT PRIMARY KEY,
   logo VARCHAR(50),
@@ -69,18 +70,17 @@ CREATE TABLE user_sub_menu(
   FOREIGN KEY (id_active) REFERENCES user_status(id_active) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
-CREATE TABLE user_access_menu(
-  id_access_menu INT AUTO_INCREMENT PRIMARY KEY,
-  id_role INT,
-  id_menu INT,
-  FOREIGN KEY (id_role) REFERENCES user_role(id_role) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  FOREIGN KEY (id_menu) REFERENCES user_menu(id_menu) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE TABLE user_access_sub_menu(
-  id_access_sub_menu INT AUTO_INCREMENT PRIMARY KEY,
-  id_role INT,
-  id_sub_menu INT,
-  FOREIGN KEY (id_role) REFERENCES user_role(id_role) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  FOREIGN KEY (id_sub_menu) REFERENCES user_sub_menu(id_sub_menu) ON UPDATE CASCADE ON DELETE CASCADE
-);
+CREATE TABLE
+  permissions (
+    id_permission INT AUTO_INCREMENT PRIMARY KEY,
+    id_role INT NOT NULL,
+    id_menu INT NULL,
+    id_sub_menu INT NULL,
+    `view` TINYINT (1) DEFAULT 0,
+    `create` TINYINT (1) DEFAULT 0,
+    `edit` TINYINT (1) DEFAULT 0,
+    `delete` TINYINT (1) DEFAULT 0,
+    FOREIGN KEY (id_role) REFERENCES user_role (id_role) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_menu) REFERENCES user_menu (id_menu) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_sub_menu) REFERENCES user_sub_menu (id_sub_menu) ON UPDATE CASCADE ON DELETE CASCADE
+  );

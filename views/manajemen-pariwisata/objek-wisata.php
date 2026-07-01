@@ -1,5 +1,5 @@
-<?php require_once("../../controller/user-management.php");
-        $_SESSION["project_wisata_sumba_barat_daya"]["name_page"] = "Wisatawan";
+<?php require_once("../../controller/manajemen-pariwisata.php");
+        $_SESSION["project_wisata_sumba_barat_daya"]["name_page"] = "Objek Wisata";
         require_once("../../templates/views_top.php"); ?>
 
         <div class="nxl-content" style="height: 100vh;">
@@ -11,7 +11,7 @@
                 <h5 class="m-b-10"><?= $_SESSION["project_wisata_sumba_barat_daya"]["name_page"] ?></h5>
               </div>
               <ul class="breadcrumb">
-                <li class="breadcrumb-item">Wisatawan</li>
+                <li class="breadcrumb-item">Objek Wisata</li>
                 <li class="breadcrumb-item"><?= $_SESSION["project_wisata_sumba_barat_daya"]["name_page"] ?></li>
               </ul>
             </div>
@@ -24,7 +24,7 @@
                   </a>
                 </div>
                 <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
-                  <a href="add-wisatawan" class="btn btn-primary">
+                  <a href="add-objek-wisata" class="btn btn-primary">
                     <i class="feather-plus me-2"></i>
                     <span>Tambah</span>
                   </a>
