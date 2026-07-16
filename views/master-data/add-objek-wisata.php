@@ -105,13 +105,16 @@
         document.addEventListener('DOMContentLoaded', function() {
           const desa = document.getElementById('desa_id');
           const kelurahan = document.getElementById('kelurahan_id');
-          function syncLokasi() {
-            kelurahan.disabled = desa.value !== '';
-            desa.disabled = kelurahan.value !== '';
-          }
-          desa.addEventListener('change', syncLokasi);
-          kelurahan.addEventListener('change', syncLokasi);
-          syncLokasi();
+          desa.addEventListener('change', function() {
+            if (desa.value !== '') {
+              kelurahan.value = '';
+            }
+          });
+          kelurahan.addEventListener('change', function() {
+            if (kelurahan.value !== '') {
+              desa.value = '';
+            }
+          });
         });
         </script>
 
