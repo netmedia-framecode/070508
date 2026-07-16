@@ -1,7 +1,12 @@
 <?php
 require_once("../controller/auth.php");
 if (isset($_SESSION["project_wisata_sumba_barat_daya"])) {
-  header("Location: ../views/");
+  $role = strtolower($_SESSION["project_wisata_sumba_barat_daya"]["users"]["role"] ?? "");
+  if ($role == "wisatawan") {
+    header("Location: ../index.php");
+  } else {
+    header("Location: ../views/");
+  }
   exit;
 } else {
   if (!isset($_SESSION["data_auth"]["en_user"])) {

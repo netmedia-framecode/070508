@@ -19,6 +19,8 @@
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/css/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/css/vendors.min.css" />
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/css/daterangepicker.min.css" />
+<link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/css/select2.min.css" />
+<link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/css/select2-theme.min.css" />
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/css/dataTables.bs5.min.css">
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/css/theme.min.css" />
 <link rel="stylesheet" type="text/css" href="<?= $baseURL ?>assets/vendor/datatables/dataTables.bootstrap4.min.css">

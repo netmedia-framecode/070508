@@ -94,73 +94,29 @@ if (isset($_POST["delete_sub_menu"])) {
   }
 }
 
-$select_user_access_menu = "SELECT user_access_menu.*, user_role.role, user_menu.menu
-            FROM user_access_menu 
-            JOIN user_role ON user_access_menu.id_role = user_role.id_role 
-            JOIN user_menu ON user_access_menu.id_menu = user_menu.id_menu";
-$views_user_access_menu = mysqli_query($conn, $select_user_access_menu);
-$select_menu_check = "SELECT user_menu.* 
-FROM user_menu 
-ORDER BY user_menu.menu ASC
+$id_role_permission = isset($_POST["role_permission"]) ? valid($conn, $_POST["role_permission"]) : 1;
+$select_permission_matrix = "SELECT 
+    user_menu.id_menu, 
+    user_menu.menu, 
+    user_menu.icon,
+    user_sub_menu.id_sub_menu, 
+    user_sub_menu.title,
+    permissions.view, 
+    permissions.create, 
+    permissions.edit, 
+    permissions.delete
+  FROM user_menu
+  LEFT JOIN user_sub_menu ON user_menu.id_menu = user_sub_menu.id_menu
+  LEFT JOIN permissions ON user_sub_menu.id_sub_menu = permissions.id_sub_menu AND permissions.id_role = '$id_role_permission'
+  ORDER BY user_menu.id_menu ASC, user_sub_menu.id_sub_menu ASC
 ";
-$views_menu_check = mysqli_query($conn, $select_menu_check);
-if (isset($_POST["add_menu_access"])) {
-  $validated_post = array_map(function ($value) use ($conn) {
-    return valid($conn, $value);
-  }, $_POST);
-  if (menu_access($conn, $validated_post, $action = 'insert') > 0) {
-    $message = "Akses ke menu berhasil ditambahkan.";
+$views_permissions = mysqli_query($conn, $select_permission_matrix);
+if (isset($_POST["update_permission"])) {
+  if (role_permission($conn, $_POST, $action = 'update') > 0) {
+    $message = "Hak akses role berhasil diperbarui.";
     $message_type = "success";
     alert($message, $message_type);
-    header("Location: menu-access");
-    exit();
-  }
-}
-if (isset($_POST["delete_menu_access"])) {
-  $validated_post = array_map(function ($value) use ($conn) {
-    return valid($conn, $value);
-  }, $_POST);
-  if (menu_access($conn, $validated_post, $action = 'delete') > 0) {
-    $message = "Akses menu " . $_POST['menu'] . " berhasil dihapus.";
-    $message_type = "success";
-    alert($message, $message_type);
-    header("Location: menu-access");
-    exit();
-  }
-}
-
-$select_user_access_sub_menu = "SELECT user_access_sub_menu.*, user_role.role, user_sub_menu.title, user_menu.menu
-            FROM user_access_sub_menu 
-            JOIN user_role ON user_access_sub_menu.id_role=user_role.id_role 
-            JOIN user_sub_menu ON user_access_sub_menu.id_sub_menu=user_sub_menu.id_sub_menu
-            JOIN user_menu ON user_sub_menu.id_menu=user_menu.id_menu";
-$views_user_access_sub_menu = mysqli_query($conn, $select_user_access_sub_menu);
-$select_sub_menu_check = "SELECT user_sub_menu.*, user_menu.menu
-          FROM user_sub_menu 
-          JOIN user_menu ON user_sub_menu.id_menu=user_menu.id_menu
-          ORDER BY user_menu.menu ASC";
-$views_sub_menu_check = mysqli_query($conn, $select_sub_menu_check);
-if (isset($_POST["add_sub_menu_access"])) {
-  $validated_post = array_map(function ($value) use ($conn) {
-    return valid($conn, $value);
-  }, $_POST);
-  if (sub_menu_access($conn, $validated_post, $action = 'insert') > 0) {
-    $message = "Akses ke sub menu berhasil ditambahkan.";
-    $message_type = "success";
-    alert($message, $message_type);
-    header("Location: sub-menu-access");
-    exit();
-  }
-}
-if (isset($_POST["delete_sub_menu_access"])) {
-  $validated_post = array_map(function ($value) use ($conn) {
-    return valid($conn, $value);
-  }, $_POST);
-  if (sub_menu_access($conn, $validated_post, $action = 'delete') > 0) {
-    $message = "Akses sub menu " . $_POST['title'] . " berhasil dihapus.";
-    $message_type = "success";
-    alert($message, $message_type);
-    header("Location: sub-menu-access");
+    header("Location: permission");
     exit();
   }
 }

@@ -94,16 +94,10 @@
                     <span>Sub Menu</span>
                   </span>
                 </a>
-                <a href="<?= $baseURL?>views/menu-access" class="dropdown-item">
+                <a href="<?= $baseURL?>views/permission" class="dropdown-item">
                   <span class="hstack">
                     <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                    <span>Menu Access</span>
-                  </span>
-                </a>
-                <a href="<?= $baseURL?>views/sub-menu-access" class="dropdown-item">
-                  <span class="hstack">
-                    <i class="wd-5 ht-5 bg-gray-500 rounded-circle me-3"></i>
-                    <span>Sub Menu Access</span>
+                    <span>Permission</span>
                   </span>
                 </a>
               </div>

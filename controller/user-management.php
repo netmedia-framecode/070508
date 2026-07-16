@@ -3,7 +3,7 @@
 require_once("../../config/Base.php");
 require_once("../../config/Auth.php");
 require_once("../../config/Alert.php");
-require_once("../../views/user-management/redirect.php");
+require_once("../../views/manajemen-pengguna/redirect.php");
 
 $select_users = "SELECT users.*, user_role.role, user_status.status 
 FROM users

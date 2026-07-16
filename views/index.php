@@ -1,8 +1,70 @@
 <?php require_once("../controller/dashboard.php");
-$_SESSION["project_wisata_sumba_barat_daya"]["name_page"] = "";
+$_SESSION["project_wisata_sumba_barat_daya"]["name_page"] = "Dashboard";
+
+if (!function_exists('dashboardBadgeClass')) {
+  function dashboardBadgeClass($status)
+  {
+    $status = strtolower((string) $status);
+    if (in_array($status, ['paid', 'settlement', 'confirmed', 'active', 'used', 'aktif', 'terkonfirmasi'])) {
+      return 'bg-soft-success text-success';
+    }
+    if (in_array($status, ['pending', 'unpaid', 'tertunda', 'diproses'])) {
+      return 'bg-soft-warning text-warning';
+    }
+    if (in_array($status, ['expired', 'cancelled', 'failed', 'dibatalkan'])) {
+      return 'bg-soft-danger text-danger';
+    }
+    return 'bg-soft-primary text-primary';
+  }
+}
+
 require_once("../templates/views_top.php"); ?>
 
-<!-- Begin Page Content -->
+<style>
+  .dashboard-stat-card {
+    border: 1px solid #edf0f5;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+  }
+
+  .dashboard-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+  }
+
+  .quick-action-card {
+    border: 1px solid #edf0f5;
+    border-radius: 8px;
+    background: #fff;
+    min-height: 132px;
+    transition: .2s ease;
+  }
+
+  .quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+  }
+
+  .quick-action-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+  }
+
+  .dashboard-table {
+    min-width: 960px;
+  }
+
+  .top-object-item {
+    border: 1px dashed #dfe4ee;
+    border-radius: 8px;
+  }
+</style>
 
 <div class="nxl-content">
   <!-- [ page-header ] start -->
@@ -12,7 +74,7 @@ require_once("../templates/views_top.php"); ?>
         <h5 class="m-b-10">Dashboard</h5>
       </div>
       <ul class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item">Home</li>
         <li class="breadcrumb-item">Dashboard</li>
       </ul>
     </div>
@@ -25,57 +87,14 @@ require_once("../templates/views_top.php"); ?>
           </a>
         </div>
         <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
-          <div id="reportrange" class="reportrange-picker d-flex align-items-center">
-            <span class="reportrange-picker-field"></span>
-          </div>
-          <div class="dropdown filter-dropdown">
-            <a class="btn btn-md btn-light-brand" data-bs-toggle="dropdown" data-bs-offset="0, 10"
-              data-bs-auto-close="outside">
-              <i class="feather-filter me-2"></i>
-              <span>Filter</span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end">
-              <div class="dropdown-item">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="Role" checked="checked" />
-                  <label class="custom-control-label c-pointer" for="Role">Role</label>
-                </div>
-              </div>
-              <div class="dropdown-item">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="Team" checked="checked" />
-                  <label class="custom-control-label c-pointer" for="Team">Team</label>
-                </div>
-              </div>
-              <div class="dropdown-item">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="Email" checked="checked" />
-                  <label class="custom-control-label c-pointer" for="Email">Email</label>
-                </div>
-              </div>
-              <div class="dropdown-item">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="Member" checked="checked" />
-                  <label class="custom-control-label c-pointer" for="Member">Member</label>
-                </div>
-              </div>
-              <div class="dropdown-item">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="Recommendation" checked="checked" />
-                  <label class="custom-control-label c-pointer" for="Recommendation">Recommendation</label>
-                </div>
-              </div>
-              <div class="dropdown-divider"></div>
-              <a href="javascript:void(0);" class="dropdown-item">
-                <i class="feather-plus me-3"></i>
-                <span>Create New</span>
-              </a>
-              <a href="javascript:void(0);" class="dropdown-item">
-                <i class="feather-filter me-3"></i>
-                <span>Manage Filter</span>
-              </a>
-            </div>
-          </div>
+          <a href="laporan/transaksi" class="btn btn-light-brand">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i>
+            <span>Laporan Transaksi</span>
+          </a>
+          <a href="manajemen-kunjungan/scan-qr-wisatawan" class="btn btn-primary">
+            <i class="bi bi-qr-code-scan me-2"></i>
+            <span>Scan QR</span>
+          </a>
         </div>
       </div>
       <div class="d-md-none d-flex align-items-center">
@@ -86,1082 +105,579 @@ require_once("../templates/views_top.php"); ?>
     </div>
   </div>
   <!-- [ page-header ] end -->
+
   <!-- [ Main Content ] start -->
   <div class="main-content">
-    <div class="row">
-      <!-- [Invoices Awaiting Payment] start -->
+    <div class="row g-4">
       <div class="col-xxl-3 col-md-6">
-        <div class="card stretch stretch-full">
+        <div class="card dashboard-stat-card stretch stretch-full">
           <div class="card-body">
-            <div class="d-flex align-items-start justify-content-between mb-4">
-              <div class="d-flex gap-4 align-items-center">
-                <div class="avatar-text avatar-lg bg-gray-200">
-                  <i class="feather-dollar-sign"></i>
-                </div>
-                <div>
-                  <div class="fs-4 fw-bold text-dark"><span class="counter">45</span>/<span class="counter">76</span>
-                  </div>
-                  <h3 class="fs-13 fw-semibold text-truncate-1-line">Invoices Awaiting Payment</h3>
-                </div>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <div>
+                <span class="text-muted d-block">Objek Wisata</span>
+                <h4 class="mb-1"><?= number_format($dashboard_total_objek_wisata, 0, ',', '.') ?></h4>
+                <small><?= number_format($dashboard_total_galeri, 0, ',', '.') ?> galeri tersedia</small>
               </div>
-              <a href="javascript:void(0);" class="">
-                <i class="feather-more-vertical"></i>
-              </a>
+              <div class="dashboard-stat-icon bg-soft-primary text-primary">
+                <i class="bi bi-geo-alt fs-4"></i>
+              </div>
             </div>
-            <div class="pt-4">
-              <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Invoices Awaiting
-                </a>
-                <div class="w-100 text-end">
-                  <span class="fs-12 text-dark">$5,569</span>
-                  <span class="fs-11 text-muted">(56%)</span>
-                </div>
-              </div>
-              <div class="progress mt-2 ht-3">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: 56%"></div>
-              </div>
+            <div class="progress mt-4 ht-3">
+              <div class="progress-bar bg-primary" style="width: <?= min(100, $dashboard_total_objek_wisata * 10) ?>%"></div>
             </div>
           </div>
         </div>
       </div>
-      <!-- [Invoices Awaiting Payment] end -->
-      <!-- [Converted Leads] start -->
       <div class="col-xxl-3 col-md-6">
-        <div class="card stretch stretch-full">
+        <div class="card dashboard-stat-card stretch stretch-full">
           <div class="card-body">
-            <div class="d-flex align-items-start justify-content-between mb-4">
-              <div class="d-flex gap-4 align-items-center">
-                <div class="avatar-text avatar-lg bg-gray-200">
-                  <i class="feather-cast"></i>
-                </div>
-                <div>
-                  <div class="fs-4 fw-bold text-dark"><span class="counter">48</span>/<span class="counter">86</span>
-                  </div>
-                  <h3 class="fs-13 fw-semibold text-truncate-1-line">Converted Leads</h3>
-                </div>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <div>
+                <span class="text-muted d-block">Wisatawan</span>
+                <h4 class="mb-1"><?= number_format($dashboard_total_wisatawan, 0, ',', '.') ?></h4>
+                <small><?= number_format($dashboard_total_users, 0, ',', '.') ?> total pengguna</small>
               </div>
-              <a href="javascript:void(0);" class="">
-                <i class="feather-more-vertical"></i>
-              </a>
+              <div class="dashboard-stat-icon bg-soft-success text-success">
+                <i class="bi bi-people fs-4"></i>
+              </div>
             </div>
-            <div class="pt-4">
-              <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Converted Leads
-                </a>
-                <div class="w-100 text-end">
-                  <span class="fs-12 text-dark">52 Completed</span>
-                  <span class="fs-11 text-muted">(63%)</span>
-                </div>
-              </div>
-              <div class="progress mt-2 ht-3">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 63%"></div>
-              </div>
+            <div class="progress mt-4 ht-3">
+              <div class="progress-bar bg-success" style="width: <?= $dashboard_total_users > 0 ? min(100, ($dashboard_total_wisatawan / $dashboard_total_users) * 100) : 0 ?>%"></div>
             </div>
           </div>
         </div>
       </div>
-      <!-- [Converted Leads] end -->
-      <!-- [Projects In Progress] start -->
       <div class="col-xxl-3 col-md-6">
-        <div class="card stretch stretch-full">
+        <div class="card dashboard-stat-card stretch stretch-full">
           <div class="card-body">
-            <div class="d-flex align-items-start justify-content-between mb-4">
-              <div class="d-flex gap-4 align-items-center">
-                <div class="avatar-text avatar-lg bg-gray-200">
-                  <i class="feather-briefcase"></i>
-                </div>
-                <div>
-                  <div class="fs-4 fw-bold text-dark"><span class="counter">16</span>/<span class="counter">20</span>
-                  </div>
-                  <h3 class="fs-13 fw-semibold text-truncate-1-line">Projects In Progress</h3>
-                </div>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <div>
+                <span class="text-muted d-block">Pendapatan</span>
+                <h4 class="mb-1">Rp <?= number_format($dashboard_pendapatan, 0, ',', '.') ?></h4>
+                <small><?= number_format($dashboard_total_pembayaran, 0, ',', '.') ?> pembayaran</small>
               </div>
-              <a href="javascript:void(0);" class="">
-                <i class="feather-more-vertical"></i>
-              </a>
-            </div>
-            <div class="pt-4">
-              <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">Projects In
-                  Progress </a>
-                <div class="w-100 text-end">
-                  <span class="fs-12 text-dark">16 Completed</span>
-                  <span class="fs-11 text-muted">(78%)</span>
-                </div>
-              </div>
-              <div class="progress mt-2 ht-3">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 78%"></div>
+              <div class="dashboard-stat-icon bg-soft-warning text-warning">
+                <i class="bi bi-cash-coin fs-4"></i>
               </div>
             </div>
+            <div id="total-sales-color-graph"></div>
           </div>
         </div>
       </div>
-      <!-- [Projects In Progress] end -->
-      <!-- [Conversion Rate] start -->
       <div class="col-xxl-3 col-md-6">
-        <div class="card stretch stretch-full">
+        <div class="card dashboard-stat-card stretch stretch-full">
           <div class="card-body">
-            <div class="d-flex align-items-start justify-content-between mb-4">
-              <div class="d-flex gap-4 align-items-center">
-                <div class="avatar-text avatar-lg bg-gray-200">
-                  <i class="feather-activity"></i>
-                </div>
-                <div>
-                  <div class="fs-4 fw-bold text-dark"><span class="counter">46.59</span>%</div>
-                  <h3 class="fs-13 fw-semibold text-truncate-1-line">Conversion Rate</h3>
-                </div>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <div>
+                <span class="text-muted d-block">Kunjungan</span>
+                <h4 class="mb-1"><?= number_format($dashboard_total_kunjungan, 0, ',', '.') ?></h4>
+                <small><?= number_format($dashboard_active_tiket, 0, ',', '.') ?> tiket aktif</small>
               </div>
-              <a href="javascript:void(0);" class="">
-                <i class="feather-more-vertical"></i>
-              </a>
-            </div>
-            <div class="pt-4">
-              <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line"> Conversion Rate
-                </a>
-                <div class="w-100 text-end">
-                  <span class="fs-12 text-dark">$2,254</span>
-                  <span class="fs-11 text-muted">(46%)</span>
-                </div>
-              </div>
-              <div class="progress mt-2 ht-3">
-                <div class="progress-bar bg-danger" role="progressbar" style="width: 46%"></div>
+              <div class="dashboard-stat-icon bg-soft-info text-info">
+                <i class="bi bi-qr-code-scan fs-4"></i>
               </div>
             </div>
+            <div id="new-tasks-area-chart"></div>
           </div>
         </div>
       </div>
-      <!-- [Conversion Rate] end -->
-      <!-- [Payment Records] start -->
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-xl-3 col-md-6">
+        <a href="manajemen-kunjungan/scan-qr-wisatawan" class="quick-action-card d-block p-4 text-decoration-none">
+          <div class="quick-action-icon bg-soft-primary text-primary mb-3">
+            <i class="bi bi-qr-code-scan fs-4"></i>
+          </div>
+          <h6 class="mb-1">Scan QR Wisatawan</h6>
+          <span class="text-muted">Catat kunjungan dari e-tiket</span>
+        </a>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <a href="manajemen-transaksi/add-pemesanan-tiket" class="quick-action-card d-block p-4 text-decoration-none">
+          <div class="quick-action-icon bg-soft-success text-success mb-3">
+            <i class="bi bi-ticket-perforated fs-4"></i>
+          </div>
+          <h6 class="mb-1">Tambah Pemesanan</h6>
+          <span class="text-muted">Input transaksi tiket baru</span>
+        </a>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <a href="manajemen-transaksi/add-konfirmasi-pembayaran" class="quick-action-card d-block p-4 text-decoration-none">
+          <div class="quick-action-icon bg-soft-warning text-warning mb-3">
+            <i class="bi bi-credit-card fs-4"></i>
+          </div>
+          <h6 class="mb-1">Konfirmasi Bayar</h6>
+          <span class="text-muted">Proses pembayaran tiket</span>
+        </a>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <a href="master-data/add-objek-wisata" class="quick-action-card d-block p-4 text-decoration-none">
+          <div class="quick-action-icon bg-soft-info text-info mb-3">
+            <i class="bi bi-map fs-4"></i>
+          </div>
+          <h6 class="mb-1">Tambah Objek Wisata</h6>
+          <span class="text-muted">Lengkapi master destinasi</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
       <div class="col-xxl-8">
         <div class="card stretch stretch-full">
           <div class="card-header">
-            <h5 class="card-title">Payment Record</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
-            </div>
+            <h5 class="card-title">Grafik Operasional Bulanan</h5>
+            <span class="text-muted"><?= date('Y') ?></span>
           </div>
           <div class="card-body custom-card-action p-0">
             <div id="payment-records-chart"></div>
           </div>
           <div class="card-footer">
             <div class="row g-4">
-              <div class="col-lg-3">
+              <div class="col-lg-3 col-6">
                 <div class="p-3 border border-dashed rounded">
-                  <div class="fs-12 text-muted mb-1">Awaiting</div>
-                  <h6 class="fw-bold text-dark">$5,486</h6>
-                  <div class="progress mt-2 ht-3">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 81%"></div>
-                  </div>
+                  <div class="fs-12 text-muted mb-1">Pemesanan</div>
+                  <h6 class="fw-bold text-dark"><?= number_format($dashboard_total_pemesanan, 0, ',', '.') ?></h6>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-3 col-6">
                 <div class="p-3 border border-dashed rounded">
-                  <div class="fs-12 text-muted mb-1">Completed</div>
-                  <h6 class="fw-bold text-dark">$9,275</h6>
-                  <div class="progress mt-2 ht-3">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 82%"></div>
-                  </div>
+                  <div class="fs-12 text-muted mb-1">Pending</div>
+                  <h6 class="fw-bold text-dark"><?= number_format($dashboard_pending_pemesanan, 0, ',', '.') ?></h6>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-3 col-6">
                 <div class="p-3 border border-dashed rounded">
-                  <div class="fs-12 text-muted mb-1">Rejected</div>
-                  <h6 class="fw-bold text-dark">$3,868</h6>
-                  <div class="progress mt-2 ht-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 68%"></div>
-                  </div>
+                  <div class="fs-12 text-muted mb-1">E-Tiket</div>
+                  <h6 class="fw-bold text-dark"><?= number_format($dashboard_total_e_tiket, 0, ',', '.') ?></h6>
                 </div>
               </div>
-              <div class="col-lg-3">
+              <div class="col-lg-3 col-6">
                 <div class="p-3 border border-dashed rounded">
-                  <div class="fs-12 text-muted mb-1">Revenue</div>
-                  <h6 class="fw-bold text-dark">$50,668</h6>
-                  <div class="progress mt-2 ht-3">
-                    <div class="progress-bar bg-dark" role="progressbar" style="width: 75%"></div>
-                  </div>
+                  <div class="fs-12 text-muted mb-1">Tiket Terpakai</div>
+                  <h6 class="fw-bold text-dark"><?= number_format($dashboard_used_tiket, 0, ',', '.') ?></h6>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- [Payment Records] end -->
-      <!-- [Total Sales] start -->
-      <div class="col-xxl-4">
-        <div class="card stretch stretch-full overflow-hidden">
-          <div class="bg-primary text-white">
-            <div class="p-4">
-              <span class="badge bg-light text-primary text-dark float-end">12%</span>
-              <div class="text-start">
-                <h4 class="text-reset">30,569</h4>
-                <p class="text-reset m-0">Total Sales</p>
-              </div>
-            </div>
-            <div id="total-sales-color-graph"></div>
-          </div>
-          <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="hstack gap-3">
-                <div class="avatar-image avatar-lg p-2 rounded">
-                  <img class="img-fluid" src="assets/images/brand/shopify.png" alt="" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);" class="d-block">Shopify eCommerce Store</a>
-                  <span class="fs-12 text-muted">Development</span>
-                </div>
-              </div>
-              <div>
-                <div class="fw-bold text-dark">$1200</div>
-                <div class="fs-12 text-end">6 Projects</div>
-              </div>
-            </div>
-            <hr class="border-dashed my-3" />
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="hstack gap-3">
-                <div class="avatar-image avatar-lg p-2 rounded">
-                  <img class="img-fluid" src="assets/images/brand/app-store.png" alt="" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);" class="d-block">iOS Apps Development</a>
-                  <span class="fs-12 text-muted">Development</span>
-                </div>
-              </div>
-              <div>
-                <div class="fw-bold text-dark">$1450</div>
-                <div class="fs-12 text-end">3 Projects</div>
-              </div>
-            </div>
-            <hr class="border-dashed my-3" />
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="hstack gap-3">
-                <div class="avatar-image avatar-lg p-2 rounded">
-                  <img class="img-fluid" src="assets/images/brand/figma.png" alt="" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);" class="d-block">Figma Dashboard Design</a>
-                  <span class="fs-12 text-muted">UI/UX Design</span>
-                </div>
-              </div>
-              <div>
-                <div class="fw-bold text-dark">$1250</div>
-                <div class="fs-12 text-end">5 Projects</div>
-              </div>
-            </div>
-          </div>
-          <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Full
-            Details</a>
-        </div>
-      </div>
-      <!-- [Total Sales] end !-->
-      <!-- [Mini] start -->
-      <div class="col-lg-4">
-        <div class="card mb-4 stretch stretch-full">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-3 align-items-center">
-              <div class="avatar-text">
-                <i class="feather feather-star"></i>
-              </div>
-              <div>
-                <div class="fw-semibold text-dark">Tasks Completed</div>
-                <div class="fs-12 text-muted">22/35 completed</div>
-              </div>
-            </div>
-            <div class="fs-4 fw-bold text-dark">22/35</div>
-          </div>
-          <div class="card-body d-flex align-items-center justify-content-between gap-4">
-            <div id="task-completed-area-chart"></div>
-            <div class="fs-12 text-muted text-nowrap">
-              <span class="fw-semibold text-primary">28% more</span><br />
-              <span>from last week</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4">
-        <div class="card mb-4 stretch stretch-full">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-3 align-items-center">
-              <div class="avatar-text">
-                <i class="feather feather-file-text"></i>
-              </div>
-              <div>
-                <div class="fw-semibold text-dark">New Tasks</div>
-                <div class="fs-12 text-muted">0/20 tasks</div>
-              </div>
-            </div>
-            <div class="fs-4 fw-bold text-dark">5/20</div>
-          </div>
-          <div class="card-body d-flex align-items-center justify-content-between gap-4">
-            <div id="new-tasks-area-chart"></div>
-            <div class="fs-12 text-muted text-nowrap">
-              <span class="fw-semibold text-success">34% more</span><br />
-              <span>from last week</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4">
-        <div class="card mb-4 stretch stretch-full">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-3 align-items-center">
-              <div class="avatar-text">
-                <i class="feather feather-airplay"></i>
-              </div>
-              <div>
-                <div class="fw-semibold text-dark">Project Done</div>
-                <div class="fs-12 text-muted">20/30 project</div>
-              </div>
-            </div>
-            <div class="fs-4 fw-bold text-dark">20/30</div>
-          </div>
-          <div class="card-body d-flex align-items-center justify-content-between gap-4">
-            <div id="project-done-area-chart"></div>
-            <div class="fs-12 text-muted text-nowrap">
-              <span class="fw-semibold text-danger">42% more</span><br />
-              <span>from last week</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- [Mini] end !-->
-      <!-- [Leads Overview] start -->
       <div class="col-xxl-4">
         <div class="card stretch stretch-full">
           <div class="card-header">
-            <h5 class="card-title">Leads Overview</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
-            </div>
+            <h5 class="card-title">Komposisi Fitur</h5>
           </div>
           <div class="card-body custom-card-action">
             <div id="leads-overview-donut"></div>
             <div class="row g-2">
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #3454d1"></span>
-                  <span>New<span class="fs-10 text-muted ms-1">(20K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #0d519e"></span>
-                  <span>Contacted<span class="fs-10 text-muted ms-1">(15K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #1976d2"></span>
-                  <span>Qualified<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #1e88e5"></span>
-                  <span>Working<span class="fs-10 text-muted ms-1">(18K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #2196f3"></span>
-                  <span>Customer<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #42a5f5"></span>
-                  <span>Proposal<span class="fs-10 text-muted ms-1">(15K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #64b5f6"></span>
-                  <span>Leads<span class="fs-10 text-muted ms-1">(16K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #90caf9"></span>
-                  <span>Progress<span class="fs-10 text-muted ms-1">(14K)</span></span>
-                </a>
-              </div>
-              <div class="col-4">
-                <a href="javascript:void(0);" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                  <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: #aad6fa"></span>
-                  <span>Others<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                </a>
-              </div>
+              <?php foreach (array_slice($dashboard_feature_summary, 0, 6) as $index => $feature): ?>
+                <div class="col-6">
+                  <a href="<?= htmlspecialchars($feature['link']) ?>" class="p-2 hstack gap-2 rounded border border-dashed border-gray-5 text-decoration-none">
+                    <span class="wd-7 ht-7 rounded-circle d-inline-block" style="background-color: <?= ['#3454d1', '#25b865', '#e49e3d', '#17a2b8', '#d13b4c', '#64748b'][$index] ?>"></span>
+                    <span class="text-truncate"><?= htmlspecialchars($feature['fitur']) ?><span class="fs-10 text-muted ms-1">(<?= number_format($feature['jumlah'], 0, ',', '.') ?>)</span></span>
+                  </a>
+                </div>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
       </div>
-      <!-- [Leads Overview] end -->
-      <!-- [Latest Leads] start -->
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-lg-4">
+        <div class="card mb-4 stretch stretch-full">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex gap-3 align-items-center">
+              <div class="avatar-text"><i class="bi bi-ticket-perforated"></i></div>
+              <div>
+                <div class="fw-semibold text-dark">Pemesanan Tiket</div>
+                <div class="fs-12 text-muted">Total transaksi pemesanan</div>
+              </div>
+            </div>
+            <div class="fs-4 fw-bold text-dark"><?= number_format($dashboard_total_pemesanan, 0, ',', '.') ?></div>
+          </div>
+          <div class="card-body d-flex align-items-center justify-content-between gap-4">
+            <div id="task-completed-area-chart"></div>
+            <a href="manajemen-transaksi/pemesanan-tiket" class="btn btn-light btn-sm">Lihat</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card mb-4 stretch stretch-full">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex gap-3 align-items-center">
+              <div class="avatar-text"><i class="bi bi-qr-code"></i></div>
+              <div>
+                <div class="fw-semibold text-dark">E-Tiket</div>
+                <div class="fs-12 text-muted">Tiket aktif dan terpakai</div>
+              </div>
+            </div>
+            <div class="fs-4 fw-bold text-dark"><?= number_format($dashboard_total_e_tiket, 0, ',', '.') ?></div>
+          </div>
+          <div class="card-body d-flex align-items-center justify-content-between gap-4">
+            <div id="project-done-area-chart"></div>
+            <a href="manajemen-transaksi/e-tiket" class="btn btn-light btn-sm">Lihat</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card mb-4 stretch stretch-full">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex gap-3 align-items-center">
+              <div class="avatar-text"><i class="bi bi-basket"></i></div>
+              <div>
+                <div class="fw-semibold text-dark">Keranjang</div>
+                <div class="fs-12 text-muted">Pantauan keranjang tertunda</div>
+              </div>
+            </div>
+            <div class="fs-4 fw-bold text-dark"><?= number_format($dashboard_total_keranjang, 0, ',', '.') ?></div>
+          </div>
+          <div class="card-body d-flex align-items-center justify-content-between gap-4">
+            <div class="fs-12 text-muted">Data dari wisatawan yang belum menjadi pemesanan tiket.</div>
+            <a href="manajemen-transaksi/data-keranjang" class="btn btn-light btn-sm">Lihat</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
       <div class="col-xxl-8">
         <div class="card stretch stretch-full">
           <div class="card-header">
-            <h5 class="card-title">Latest Leads</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
-            </div>
+            <h5 class="card-title">Ringkasan Fitur Sistem</h5>
           </div>
-          <div class="card-body custom-card-action p-0">
+          <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-hover mb-0">
+              <table class="table table-hover dashboard-table" id="dashboardFeatureTable">
                 <thead>
-                  <tr class="border-b">
-                    <th scope="row">Users</th>
-                    <th>Proposal</th>
-                    <th>Date</th>
+                  <tr>
+                    <th>#</th>
+                    <th>Fitur</th>
+                    <th>Kategori</th>
+                    <th>Jumlah Data</th>
                     <th>Status</th>
-                    <th class="text-end">Actions</th>
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-image">
-                          <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
-                        </div>
-                        <a href="javascript:void(0);">
-                          <span class="d-block">Archie Cantones</span>
-                          <span class="fs-12 d-block fw-normal text-muted"><span class="__cf_email__"
-                              data-cfemail="3051425359551e445f5e554370575d51595c1e535f5d">[email&#160;protected]</span></span>
+                  <?php $no = 1; foreach ($dashboard_feature_summary as $feature): ?>
+                    <tr>
+                      <td><?= $no++ ?></td>
+                      <td><?= htmlspecialchars($feature['fitur']) ?></td>
+                      <td><?= htmlspecialchars($feature['kategori']) ?></td>
+                      <td><?= number_format($feature['jumlah'], 0, ',', '.') ?></td>
+                      <td><span class="badge <?= dashboardBadgeClass($feature['status']) ?>"><?= htmlspecialchars($feature['status']) ?></span></td>
+                      <td>
+                        <a href="<?= htmlspecialchars($feature['link']) ?>" class="btn btn-light btn-sm">
+                          <i class="bi bi-box-arrow-up-right me-1"></i>Buka
                         </a>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-gray-200 text-dark">Sent</span>
-                    </td>
-                    <td>11/06/2023 10:53</td>
-                    <td>
-                      <span class="badge bg-soft-success text-success">Completed</span>
-                    </td>
-                    <td class="text-end">
-                      <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-image">
-                          <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
-                        </div>
-                        <a href="javascript:void(0);">
-                          <span class="d-block">Holmes Cherryman</span>
-                          <span class="fs-12 d-block fw-normal text-muted"><span class="__cf_email__"
-                              data-cfemail="f1969e9d9c82df9299909fb1969c90989ddf929e9c">[email&#160;protected]</span></span>
-                        </a>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-gray-200 text-dark">New</span>
-                    </td>
-                    <td>11/06/2023 10:53</td>
-                    <td>
-                      <span class="badge bg-soft-primary text-primary">In Progress </span>
-                    </td>
-                    <td class="text-end">
-                      <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-image">
-                          <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
-                        </div>
-                        <a href="javascript:void(0);">
-                          <span class="d-block">Malanie Hanvey</span>
-                          <span class="fs-12 d-block fw-normal text-muted"><span class="__cf_email__"
-                              data-cfemail="7418151a1d115a1a02110d1a341319151d185a171b19">[email&#160;protected]</span></span>
-                        </a>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-gray-200 text-dark">Sent</span>
-                    </td>
-                    <td>11/06/2023 10:53</td>
-                    <td>
-                      <span class="badge bg-soft-success text-success">Completed</span>
-                    </td>
-                    <td class="text-end">
-                      <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-image">
-                          <img src="assets/images/avatar/5.png" alt="" class="img-fluid" />
-                        </div>
-                        <a href="javascript:void(0);">
-                          <span class="d-block">Kenneth Hune</span>
-                          <span class="fs-12 d-block fw-normal text-muted"><span class="__cf_email__"
-                              data-cfemail="a7c9c9c2d3cf89d2c9c2e7c0cac6cecb89c4c8ca">[email&#160;protected]</span></span>
-                        </a>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-gray-200 text-dark">Returning</span>
-                    </td>
-                    <td>11/06/2023 10:53</td>
-                    <td>
-                      <span class="badge bg-soft-warning text-warning">Not Interested</span>
-                    </td>
-                    <td class="text-end">
-                      <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-image">
-                          <img src="assets/images/avatar/6.png" alt="" class="img-fluid" />
-                        </div>
-                        <a href="javascript:void(0);">
-                          <span class="d-block">Valentine Maton</span>
-                          <span class="fs-12 d-block fw-normal text-muted"><span class="__cf_email__"
-                              data-cfemail="cdaca1a8a3a4a3a8e3acb9a2a38daaa0aca4a1e3aea2a0">[email&#160;protected]</span></span>
-                        </a>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="badge bg-gray-200 text-dark">Sent</span>
-                    </td>
-                    <td>11/06/2023 10:53</td>
-                    <td>
-                      <span class="badge bg-soft-success text-success">Completed</span>
-                    </td>
-                    <td class="text-end">
-                      <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
                 </tbody>
               </table>
             </div>
           </div>
-          <div class="card-footer">
-            <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
-              <li>
-                <a href="javascript:void(0);"><i class="bi bi-arrow-left"></i></a>
-              </li>
-              <li><a href="javascript:void(0);" class="active">1</a></li>
-              <li><a href="javascript:void(0);">2</a></li>
-              <li>
-                <a href="javascript:void(0);"><i class="bi bi-dot"></i></a>
-              </li>
-              <li><a href="javascript:void(0);">8</a></li>
-              <li><a href="javascript:void(0);">9</a></li>
-              <li>
-                <a href="javascript:void(0);"><i class="bi bi-arrow-right"></i></a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
-      <!-- [Latest Leads] end -->
-      <!--! BEGIN: [Upcoming Schedule] !-->
       <div class="col-xxl-4">
         <div class="card stretch stretch-full">
           <div class="card-header">
-            <h5 class="card-title">Upcoming Schedule</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
-            </div>
+            <h5 class="card-title">Objek Wisata Terlaris</h5>
           </div>
           <div class="card-body">
-            <!--! BEGIN: [Events] !-->
-            <div class="p-3 border border-dashed rounded-3 mb-3">
-              <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="wd-50 ht-50 bg-soft-primary text-primary lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                    <span class="fs-18 fw-bold mb-1 d-block">20</span>
-                    <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
+            <?php if (count($dashboard_top_objek) > 0): ?>
+              <?php foreach ($dashboard_top_objek as $objek): ?>
+                <div class="top-object-item p-3 mb-3">
+                  <div class="d-flex align-items-start justify-content-between gap-3">
+                    <div>
+                      <h6 class="mb-1"><?= htmlspecialchars($objek['nama_wisata'] ?: '-') ?></h6>
+                      <span class="text-muted fs-12">Harga tiket Rp <?= number_format($objek['harga_tiket'], 0, ',', '.') ?></span>
+                    </div>
+                    <span class="badge bg-soft-primary text-primary"><?= number_format($objek['jumlah_pemesanan'], 0, ',', '.') ?> pesan</span>
                   </div>
-                  <div class="text-dark">
-                    <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">React Dashboard Design</a>
-                    <span class="fs-11 fw-normal text-muted text-truncate-1-line">11:30am - 12:30pm</span>
-                  </div>
+                  <div class="mt-2 fs-12 text-muted">Nilai pemesanan Rp <?= number_format($objek['total_tagihan'], 0, ',', '.') ?></div>
                 </div>
-                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Janette Dalton">
-                    <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Michael Ksen">
-                    <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Socrates Itumay">
-                    <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Explorer More">
-                    <i class="feather-more-horizontal"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <!--! BEGIN: [Events] !-->
-            <div class="p-3 border border-dashed rounded-3 mb-3">
-              <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="wd-50 ht-50 bg-soft-warning text-warning lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                    <span class="fs-18 fw-bold mb-1 d-block">30</span>
-                    <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                  </div>
-                  <div class="text-dark">
-                    <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Admin Design Concept</a>
-                    <span class="fs-11 fw-normal text-muted text-truncate-1-line">10:00am - 12:00pm</span>
-                  </div>
-                </div>
-                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Janette Dalton">
-                    <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Michael Ksen">
-                    <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Explorer More">
-                    <i class="feather-more-horizontal"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <!--! BEGIN: [Events] !-->
-            <div class="p-3 border border-dashed rounded-3 mb-3">
-              <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="wd-50 ht-50 bg-soft-success text-success lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                    <span class="fs-18 fw-bold mb-1 d-block">17</span>
-                    <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                  </div>
-                  <div class="text-dark">
-                    <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Standup Team Meeting</a>
-                    <span class="fs-11 fw-normal text-muted text-truncate-1-line">8:00am - 9:00am</span>
-                  </div>
-                </div>
-                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Janette Dalton">
-                    <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Michael Ksen">
-                    <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Socrates Itumay">
-                    <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Explorer More">
-                    <i class="feather-more-horizontal"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <!--! BEGIN: [Events] !-->
-            <div class="p-3 border border-dashed rounded-3 mb-2">
-              <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="wd-50 ht-50 bg-soft-danger text-danger lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                    <span class="fs-18 fw-bold mb-1 d-block">25</span>
-                    <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                  </div>
-                  <div class="text-dark">
-                    <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Zoom Team Meeting</a>
-                    <span class="fs-11 fw-normal text-muted text-truncate-1-line">03:30pm - 05:30pm</span>
-                  </div>
-                </div>
-                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Janette Dalton">
-                    <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Socrates Itumay">
-                    <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Marianne Audrey">
-                    <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                  </a>
-                  <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                    data-bs-trigger="hover" title="Explorer More">
-                    <i class="feather-more-horizontal"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="text-center text-muted py-4">Belum ada data objek wisata.</div>
+            <?php endif; ?>
           </div>
-          <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Upcomming
-            Schedule</a>
         </div>
       </div>
-      <!--! END: [Upcoming Schedule] !-->
-      <!--! BEGIN: [Project Status] !-->
-      <div class="col-xxl-4">
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-12">
         <div class="card stretch stretch-full">
           <div class="card-header">
-            <h5 class="card-title">Project Status</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
+            <h5 class="card-title">Aktivitas Terbaru</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover dashboard-table" id="dashboardActivityTable">
+                <thead>
+                  <tr>
+                    <th>Jenis</th>
+                    <th>Kode</th>
+                    <th>Wisatawan</th>
+                    <th>Objek Wisata</th>
+                    <th>Nominal</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($dashboard_recent_activity as $activity): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($activity['jenis'] ?: '-') ?></td>
+                      <td><?= htmlspecialchars($activity['kode'] ?: '-') ?></td>
+                      <td><?= htmlspecialchars($activity['nama'] ?: '-') ?></td>
+                      <td><?= htmlspecialchars($activity['nama_wisata'] ?: '-') ?></td>
+                      <td><?= (float) $activity['nominal'] > 0 ? 'Rp ' . number_format($activity['nominal'], 0, ',', '.') : '-' ?></td>
+                      <td><?= $activity['tanggal'] ? date('d/m/Y H:i', strtotime($activity['tanggal'])) : '-' ?></td>
+                      <td><span class="badge <?= dashboardBadgeClass($activity['status']) ?>"><?= htmlspecialchars($activity['status'] ?: '-') ?></span></td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="card-body custom-card-action">
-            <div class="mb-3">
-              <div class="mb-4 pb-1 d-flex">
-                <div class="d-flex w-50 align-items-center me-3">
-                  <img src="assets/images/brand/app-store.png" alt="laravel-logo" class="me-3" width="35" />
-                  <div>
-                    <a href="javascript:void(0);" class="text-truncate-1-line">Apps Development</a>
-                    <div class="fs-11 text-muted">Applications</div>
-                  </div>
-                </div>
-                <div class="d-flex flex-grow-1 align-items-center">
-                  <div class="progress w-100 me-3 ht-5">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 54%" aria-valuenow="54"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span class="text-muted">54%</span>
-                </div>
-              </div>
-              <hr class="border-dashed my-3" />
-              <div class="mb-4 pb-1 d-flex">
-                <div class="d-flex w-50 align-items-center me-3">
-                  <img src="assets/images/brand/figma.png" alt="figma-logo" class="me-3" width="35" />
-                  <div>
-                    <a href="javascript:void(0);" class="text-truncate-1-line">Dashboard Design</a>
-                    <div class="fs-11 text-muted">App UI Kit</div>
-                  </div>
-                </div>
-                <div class="d-flex flex-grow-1 align-items-center">
-                  <div class="progress w-100 me-3 ht-5">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 86%" aria-valuenow="86"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span class="text-muted">86%</span>
-                </div>
-              </div>
-              <hr class="border-dashed my-3" />
-              <div class="mb-4 pb-1 d-flex">
-                <div class="d-flex w-50 align-items-center me-3">
-                  <img src="assets/images/brand/facebook.png" alt="vue-logo" class="me-3" width="35" />
-                  <div>
-                    <a href="javascript:void(0);" class="text-truncate-1-line">Facebook Marketing</a>
-                    <div class="fs-11 text-muted">Marketing</div>
-                  </div>
-                </div>
-                <div class="d-flex flex-grow-1 align-items-center">
-                  <div class="progress w-100 me-3 ht-5">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 90%" aria-valuenow="90"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span class="text-muted">90%</span>
-                </div>
-              </div>
-              <hr class="border-dashed my-3" />
-              <div class="mb-4 pb-1 d-flex">
-                <div class="d-flex w-50 align-items-center me-3">
-                  <img src="assets/images/brand/github.png" alt="react-logo" class="me-3" width="35" />
-                  <div>
-                    <a href="javascript:void(0);" class="text-truncate-1-line">React Dashboard Github</a>
-                    <div class="fs-11 text-muted">Dashboard</div>
-                  </div>
-                </div>
-                <div class="d-flex flex-grow-1 align-items-center">
-                  <div class="progress w-100 me-3 ht-5">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: 37%" aria-valuenow="37"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span class="text-muted">37%</span>
-                </div>
-              </div>
-              <hr class="border-dashed my-3" />
-              <div class="d-flex">
-                <div class="d-flex w-50 align-items-center me-3">
-                  <img src="assets/images/brand/paypal.png" alt="sketch-logo" class="me-3" width="35" />
-                  <div>
-                    <a href="javascript:void(0);" class="text-truncate-1-line">Paypal Payment Gateway</a>
-                    <div class="fs-11 text-muted">Payment</div>
-                  </div>
-                </div>
-                <div class="d-flex flex-grow-1 align-items-center">
-                  <div class="progress w-100 me-3 ht-5">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 29%" aria-valuenow="29"
-                      aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span class="text-muted">29%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Upcomming
-            Projects</a>
         </div>
       </div>
-      <!--! END: [Project Status] !-->
-      <!--! BEGIN: [Team Progress] !-->
-      <div class="col-xxl-4">
-        <div class="card stretch stretch-full">
-          <div class="card-header">
-            <h5 class="card-title">Team Progress</h5>
-            <div class="card-header-action">
-              <div class="card-header-btn">
-                <div data-bs-toggle="tooltip" title="Delete">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Refresh">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"> </a>
-                </div>
-                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                  <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"> </a>
-                </div>
-              </div>
-              <div class="dropdown">
-                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                  data-bs-offset="25, 25">
-                  <div data-bs-toggle="tooltip" title="Options">
-                    <i class="feather-more-vertical"></i>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end">
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-at-sign"></i>New</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-calendar"></i>Event</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-bell"></i>Snoozed</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-trash-2"></i>Deleted</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-settings"></i>Settings</a>
-                  <a href="javascript:void(0);" class="dropdown-item"><i class="feather-life-buoy"></i>Tips & Tricks</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="card-body custom-card-action">
-            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-              <div class="hstack gap-3">
-                <div class="avatar-image">
-                  <img src="assets/images/avatar/1.png" alt="" class="img-fluid" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);">Alexandra Della</a>
-                  <div class="fs-11 text-muted">Frontend Developer</div>
-                </div>
-              </div>
-              <div class="team-progress-1"></div>
-            </div>
-            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-              <div class="hstack gap-3">
-                <div class="avatar-image">
-                  <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);">Archie Cantones</a>
-                  <div class="fs-11 text-muted">UI/UX Designer</div>
-                </div>
-              </div>
-              <div class="team-progress-2"></div>
-            </div>
-            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-              <div class="hstack gap-3">
-                <div class="avatar-image">
-                  <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);">Malanie Hanvey</a>
-                  <div class="fs-11 text-muted">Backend Developer</div>
-                </div>
-              </div>
-              <div class="team-progress-3"></div>
-            </div>
-            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-2">
-              <div class="hstack gap-3">
-                <div class="avatar-image">
-                  <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
-                </div>
-                <div>
-                  <a href="javascript:void(0);">Kenneth Hune</a>
-                  <div class="fs-11 text-muted">Digital Marketer</div>
-                </div>
-              </div>
-              <div class="team-progress-4"></div>
-            </div>
-          </div>
-          <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Update 30 Min
-            Ago</a>
-        </div>
-      </div>
-      <!--! END: [Team Progress] !-->
     </div>
   </div>
   <!-- [ Main Content ] end -->
 </div>
-<!-- /.container-fluid -->
+
+<script>
+  window.addEventListener('load', function() {
+    const monthLabels = <?= json_encode(array_values($dashboard_chart_months)) ?>;
+    const monthlyOrders = <?= json_encode(array_values($dashboard_chart_pemesanan)) ?>;
+    const monthlyPayments = <?= json_encode(array_values($dashboard_chart_pembayaran)) ?>;
+    const monthlyVisits = <?= json_encode(array_values($dashboard_chart_kunjungan)) ?>;
+    const monthlyRevenue = <?= json_encode(array_values($dashboard_chart_pendapatan)) ?>;
+    const featureLabels = <?= json_encode($dashboard_feature_chart_labels) ?>;
+    const featureSeries = <?= json_encode($dashboard_feature_chart_data) ?>;
+    const totalTickets = <?= (int) $dashboard_total_e_tiket ?>;
+    const activeTickets = <?= (int) $dashboard_active_tiket ?>;
+    const usedTickets = <?= (int) $dashboard_used_tiket ?>;
+
+    const formatRupiah = value => new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(Number(value || 0));
+
+    function resetChartTarget(selector) {
+      const target = document.querySelector(selector);
+      if (target) {
+        target.innerHTML = '';
+      }
+      return target;
+    }
+
+    new ApexCharts(resetChartTarget('#payment-records-chart'), {
+      chart: {
+        height: 380,
+        stacked: false,
+        toolbar: {
+          show: false
+        }
+      },
+      stroke: {
+        width: [0, 3, 3],
+        curve: 'smooth'
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          columnWidth: '35%'
+        }
+      },
+      colors: ['#3454d1', '#25b865', '#e49e3d'],
+      series: [{
+          name: 'Pemesanan',
+          type: 'bar',
+          data: monthlyOrders
+        },
+        {
+          name: 'Pembayaran',
+          type: 'line',
+          data: monthlyPayments
+        },
+        {
+          name: 'Kunjungan',
+          type: 'line',
+          data: monthlyVisits
+        }
+      ],
+      xaxis: {
+        categories: monthLabels
+      },
+      yaxis: {
+        labels: {
+          formatter: value => new Intl.NumberFormat('id-ID').format(value) + ' data'
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      legend: {
+        position: 'top'
+      }
+    }).render();
+
+    new ApexCharts(resetChartTarget('#leads-overview-donut'), {
+      chart: {
+        width: 328,
+        type: 'donut'
+      },
+      dataLabels: {
+        enabled: false
+      },
+      labels: featureSeries.some(value => Number(value) > 0) ? featureLabels : ['Belum ada data'],
+      series: featureSeries.some(value => Number(value) > 0) ? featureSeries : [1],
+      colors: ['#3454d1', '#25b865', '#e49e3d', '#17a2b8', '#d13b4c', '#64748b', '#8b5cf6', '#14b8a6', '#f97316', '#0ea5e9'],
+      stroke: {
+        width: 0
+      },
+      legend: {
+        show: false
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '78%'
+          }
+        }
+      }
+    }).render();
+
+    new ApexCharts(resetChartTarget('#total-sales-color-graph'), {
+      chart: {
+        type: 'area',
+        height: 76,
+        sparkline: {
+          enabled: true
+        }
+      },
+      series: [{
+        name: 'Pendapatan',
+        data: monthlyRevenue
+      }],
+      colors: ['#e49e3d'],
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          opacityFrom: .35,
+          opacityTo: .05
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: value => formatRupiah(value)
+        }
+      }
+    }).render();
+
+    new ApexCharts(resetChartTarget('#new-tasks-area-chart'), {
+      chart: {
+        type: 'area',
+        height: 76,
+        sparkline: {
+          enabled: true
+        }
+      },
+      series: [{
+        name: 'Kunjungan',
+        data: monthlyVisits
+      }],
+      colors: ['#17a2b8'],
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          opacityFrom: .3,
+          opacityTo: .04
+        }
+      }
+    }).render();
+
+    new ApexCharts(resetChartTarget('#task-completed-area-chart'), {
+      chart: {
+        type: 'area',
+        height: 100,
+        sparkline: {
+          enabled: true
+        }
+      },
+      series: [{
+        name: 'Pemesanan',
+        data: monthlyOrders
+      }],
+      colors: ['#3454d1'],
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          opacityFrom: .25,
+          opacityTo: .04
+        }
+      }
+    }).render();
+
+    new ApexCharts(resetChartTarget('#project-done-area-chart'), {
+      chart: {
+        type: 'bar',
+        height: 100,
+        sparkline: {
+          enabled: true
+        }
+      },
+      series: [{
+        name: 'E-Tiket',
+        data: [activeTickets, usedTickets, Math.max(totalTickets - activeTickets - usedTickets, 0)]
+      }],
+      colors: ['#25b865'],
+      plotOptions: {
+        bar: {
+          borderRadius: 3,
+          columnWidth: '45%'
+        }
+      },
+      tooltip: {
+        x: {
+          formatter: function(value, opts) {
+            return ['Active', 'Used', 'Lainnya'][opts.dataPointIndex] || 'E-Tiket';
+          }
+        }
+      }
+    }).render();
+
+    if (window.jQuery && window.jQuery.fn.DataTable) {
+      window.jQuery('#dashboardFeatureTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [10, 20, 50, 100]
+      });
+      window.jQuery('#dashboardActivityTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [10, 20, 50, 100],
+        order: []
+      });
+    }
+  });
+</script>
 
 <?php require_once("../templates/views_bottom.php") ?>

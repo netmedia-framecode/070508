@@ -1,5 +1,4 @@
-<div style="height: 100px; width: 100%; display: block; clear: both;"></div>
-<footer class="footer" style="position: absolute; bottom: 0; left: 0; width: 100%; background-color: #ffffff; border-top: 1px solid #e3e6f0; padding: 20px;">
+<footer class="footer">
   <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
     <span>Copyright &copy; <a href="https://wasd.netmedia-framecode.com" class="text-decoration-none">WASD Netmedia
         Framecode</a> <?= date('Y') ?> | Develop by jermy klndi</span>
@@ -8,6 +7,8 @@
 </main>
 
 <script src="<?= $baseURL ?>assets/vendor/js/vendors.min.js"></script>
+<script src="<?= $baseURL ?>assets/vendor/js/select2.min.js"></script>
+<script src="<?= $baseURL ?>assets/vendor/js/select2-active.min.js"></script>
 <script src="<?= $baseURL ?>assets/vendor/js/daterangepicker.min.js"></script>
 <script src="<?= $baseURL ?>assets/vendor/js/apexcharts.min.js"></script>
 <script src="<?= $baseURL ?>assets/vendor/js/circle-progress.min.js"></script>
