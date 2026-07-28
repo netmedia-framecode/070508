@@ -40,7 +40,9 @@ $tickets = public_user_tickets($id_user);
               <span class="h-fit rounded-full px-3 py-1 text-xs font-extrabold <?= $ticketBadge ?>"><?= htmlspecialchars($ticket['status_tiket'] ?: 'Active') ?></span>
             </div>
             <div class="mt-6 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
-              <div class="break-all text-2xl font-extrabold tracking-wide text-slate-950"><?= htmlspecialchars($ticket['kode_qr']) ?></div>
+              <div class="qr-code mx-auto flex min-h-[220px] w-[220px] items-center justify-center rounded-2xl bg-white p-3"
+                data-code="<?= htmlspecialchars($ticket['kode_qr'], ENT_QUOTES, 'UTF-8') ?>"></div>
+              <div class="mt-3 break-all text-sm font-extrabold tracking-wide text-slate-950"><?= htmlspecialchars($ticket['kode_qr']) ?></div>
               <p class="mt-2 text-xs font-semibold text-slate-500">Kode ini dipindai oleh petugas di lokasi.</p>
             </div>
             <div class="mt-5 grid gap-3 sm:grid-cols-3">
@@ -67,5 +69,30 @@ $tickets = public_user_tickets($id_user);
       <?php endif; ?>
     </div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!window.QRCode) {
+      return;
+    }
+
+    document.querySelectorAll('.qr-code').forEach(function(container) {
+      const code = container.dataset.code || '';
+      if (!code) {
+        return;
+      }
+
+      new QRCode(container, {
+        text: code,
+        width: 196,
+        height: 196,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  });
+  </script>
 
   <?php require_once("sections/public_footer.php"); ?>

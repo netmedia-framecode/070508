@@ -8,7 +8,7 @@ $profileImage = "";
 $siteName = $data_utilities['name_web'] ?? 'Wisata Sumba Barat Daya';
 $siteLogo = $data_utilities['logo'] ?? '';
 
-$navDesaDestinasi = public_rows($conn, "SELECT DISTINCT desa.id, desa.nama, kecamatan.nama AS nama_kecamatan
+$navDesaDestinasi = public_rows($conn, "SELECT DISTINCT desa.id, desa.nama, desa.kecamatan_id, kecamatan.nama AS nama_kecamatan
   FROM objek_wisata
   JOIN desa ON objek_wisata.desa_id=desa.id
   JOIN kecamatan ON desa.kecamatan_id=kecamatan.id
@@ -19,6 +19,10 @@ $navKecamatanDestinasi = public_rows($conn, "SELECT DISTINCT kecamatan.id, kecam
   LEFT JOIN kelurahan ON objek_wisata.kelurahan_id=kelurahan.id
   JOIN kecamatan ON kecamatan.id=COALESCE(desa.kecamatan_id, kelurahan.kecamatan_id)
   ORDER BY kecamatan.nama ASC");
+$navDesaPerKecamatan = [];
+foreach ($navDesaDestinasi as $navDesa) {
+  $navDesaPerKecamatan[(int) $navDesa['kecamatan_id']][] = $navDesa;
+}
 
 if (!empty($currentUser["image"])) {
   $profileImage = $baseURL . "assets/img/profil/" . ltrim($currentUser["image"], "/");
@@ -49,33 +53,40 @@ if (!empty($currentUser["image"])) {
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
             </svg>
           </summary>
-          <div class="absolute left-0 mt-3 grid max-h-[70vh] w-[34rem] grid-cols-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
-            <div class="border-r border-slate-100 p-3">
-              <p class="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-travel-blue">Berdasarkan Desa</p>
-              <div class="max-h-80 overflow-y-auto">
-                <?php foreach ($navDesaDestinasi as $navDesa): ?>
-                <a href="<?= $baseURL ?>objek-wisata?tipe=desa&amp;id=<?= (int) $navDesa['id'] ?>" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-travel-blue">
-                  <?= htmlspecialchars($navDesa['nama']) ?>
-                  <span class="block text-xs font-medium text-slate-400">Kec. <?= htmlspecialchars($navDesa['nama_kecamatan']) ?></span>
+          <div class="absolute left-0 mt-3 w-72 rounded-2xl border border-slate-200 bg-white p-3 shadow-soft">
+            <p class="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-travel-blue">Pilih Kecamatan</p>
+            <div>
+              <?php foreach ($navKecamatanDestinasi as $navKecamatan):
+                $kecamatanId = (int) $navKecamatan['id'];
+                $desaKecamatan = $navDesaPerKecamatan[$kecamatanId] ?? [];
+              ?>
+              <div class="destination-district-item relative">
+                <a href="<?= $baseURL ?>objek-wisata?tipe=kecamatan&amp;id=<?= $kecamatanId ?>" class="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-travel-blue">
+                  <span><?= htmlspecialchars($navKecamatan['nama']) ?></span>
+                  <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.17 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+                  </svg>
                 </a>
-                <?php endforeach; ?>
-                <?php if (count($navDesaDestinasi) == 0): ?>
-                <p class="px-3 py-2 text-xs font-medium text-slate-400">Belum ada destinasi berdasarkan desa.</p>
-                <?php endif; ?>
+
+                <div class="destination-village-menu absolute left-full top-0 z-10 w-72 pl-2">
+                  <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-soft">
+                    <p class="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-travel-blue">Desa di <?= htmlspecialchars($navKecamatan['nama']) ?></p>
+                    <?php if ($desaKecamatan): ?>
+                      <?php foreach ($desaKecamatan as $navDesa): ?>
+                      <a href="<?= $baseURL ?>objek-wisata?tipe=desa&amp;id=<?= (int) $navDesa['id'] ?>" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-travel-blue">
+                        <?= htmlspecialchars($navDesa['nama']) ?>
+                      </a>
+                      <?php endforeach; ?>
+                    <?php else: ?>
+                      <p class="px-3 py-2 text-xs font-medium text-slate-400">Belum ada destinasi yang terhubung ke desa.</p>
+                    <?php endif; ?>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="p-3">
-              <p class="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-travel-blue">Berdasarkan Kecamatan</p>
-              <div class="max-h-80 overflow-y-auto">
-                <?php foreach ($navKecamatanDestinasi as $navKecamatan): ?>
-                <a href="<?= $baseURL ?>objek-wisata?tipe=kecamatan&amp;id=<?= (int) $navKecamatan['id'] ?>" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-travel-blue">
-                  <?= htmlspecialchars($navKecamatan['nama']) ?>
-                </a>
-                <?php endforeach; ?>
-                <?php if (count($navKecamatanDestinasi) == 0): ?>
-                <p class="px-3 py-2 text-xs font-medium text-slate-400">Belum ada destinasi berdasarkan kecamatan.</p>
-                <?php endif; ?>
-              </div>
+              <?php endforeach; ?>
+              <?php if (count($navKecamatanDestinasi) == 0): ?>
+              <p class="px-3 py-2 text-xs font-medium text-slate-400">Belum ada destinasi berdasarkan kecamatan.</p>
+              <?php endif; ?>
             </div>
           </div>
         </details>

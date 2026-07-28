@@ -86,4 +86,13 @@
   .destination-dropdown[open] .destination-caret {
     transform: rotate(180deg);
   }
+
+  .destination-village-menu {
+    display: none;
+  }
+
+  .destination-district-item:hover > .destination-village-menu,
+  .destination-district-item:focus-within > .destination-village-menu {
+    display: block;
+  }
 </style>
